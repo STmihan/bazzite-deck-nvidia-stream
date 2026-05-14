@@ -3,7 +3,16 @@ FROM scratch AS ctx
 COPY build_files /
 
 # Base Image
-FROM ghcr.io/ublue-os/bazzite:stable
+# FROM ghcr.io/ublue-os/bazzite:stable
+
+FROM ghcr.io/ublue-os/bazzite-deck-nvidia:stable
+
+RUN curl -Lo /etc/yum.repos.d/_copr-kylegospo-bazzite.repo \
+    https://copr.fedorainfracloud.org/coprs/kylegospo/bazzite/repo/fedora-$(rpm -E %fedora)/kylegospo-bazzite-fedora-$(rpm -E %fedora).repo && \
+    dnf5 -y --refresh upgrade gamescope gamescope-libs && \
+    rm -f /etc/yum.repos.d/_copr-kylegospo-bazzite.repo && \
+    dnf5 clean all && \
+    ostree container commit
 
 ## Other possible base images include:
 # FROM ghcr.io/ublue-os/bazzite:latest
