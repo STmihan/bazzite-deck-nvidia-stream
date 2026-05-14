@@ -1,19 +1,11 @@
-FROM ghcr.io/ublue-os/bazzite-deck-nvidia:unstable AS source
-
-RUN dnf5 install -y rpmrebuild && \
-    mkdir -p /export && \
-    rpmrebuild -p -d /export --notest-install terra-gamescope && \
-    rpmrebuild -p -d /export --notest-install terra-gamescope-libs && \
-    ls -lh /export/x86_64/
-
 FROM ghcr.io/ublue-os/bazzite-deck-nvidia:stable
 
-COPY --from=source /export/x86_64/terra-gamescope-*.rpm /tmp/gs/
-
-RUN dnf5 -y remove --no-autoremove gamescope gamescope-libs && \
-    dnf5 -y install /tmp/gs/terra-gamescope-*.rpm && \
-    ln -f /usr/bin/gamescope /usr/sbin/gamescope && \
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra43-extras && \
+    rpm -e --nodeps --allmatches gamescope gamescope-libs && \
+    dnf5 -y --refresh --enablerepo=terra-extras install \
+        terra-gamescope \
+        terra-gamescope-libs.x86_64 \
+        terra-gamescope-libs.i686 && \
     rpm -q terra-gamescope terra-gamescope-libs && \
-    rm -rf /tmp/gs && \
+    dnf5 clean all && \
     ostree container commit
-
